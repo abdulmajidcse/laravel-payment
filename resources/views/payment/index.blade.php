@@ -3,10 +3,11 @@
 @section('headTitle', 'Payment')
 
 @section('content')
-    <div class="container">
+    <div class="container mt-5">
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title">Payment List</h5>
+                <a href="{{ route('payment.newOrder') }}" class="btn btn-sm btn-primary">New Order</a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
