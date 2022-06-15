@@ -3,6 +3,7 @@
 namespace App\Services\Bkash;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 trait BkashCheckoutTokenService
@@ -13,6 +14,14 @@ trait BkashCheckoutTokenService
     public function checkoutGrantToken()
     {
         try {
+            $cacheGrantToken = config('bkashapi.checkout.cache_grant_token_name');
+            $cacheRefreshToken = config('bkashapi.checkout.cache_refresh_token_name');
+            if (Cache::has($cacheGrantToken)) {
+                return Cache::get($cacheGrantToken);
+            } elseif (Cache::has($cacheRefreshToken)) {
+                return $this->checkoutRefreshToken(Cache::get($cacheRefreshToken)['refresh_token']);
+            }
+
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
@@ -23,10 +32,15 @@ trait BkashCheckoutTokenService
                 'app_secret' => config('bkashapi.checkout.app_secret')
             ]);
 
-            return $response->collect();
+            $responseCollection = $response->collect();
+
+            // cached grant & refresh token
+            $this->checkoutTokenCached($responseCollection);
+
+            return $responseCollection;
         } catch (\Throwable $th) {
             // server error
-            return Collection::make(['message' => 'Server error. Please, contact to Service Provider.']);
+            return Collection::make(['errorCode' => 500, 'errorMessage' => 'Server error. Please, contact to Service Provider.']);
         }
     }
 
@@ -47,10 +61,29 @@ trait BkashCheckoutTokenService
                 'refresh_token' => $refreshToken,
             ]);
 
-            return $response->collect();
+            $responseCollection = $response->collect();
+
+            // cached grant & refresh token
+            $this->checkoutTokenCached($responseCollection);
+
+            return $responseCollection;
         } catch (\Throwable $th) {
             // server error
-            return Collection::make(['message' => 'Server error. Please, contact to Service Provider.']);
+            return Collection::make(['errorCode' => 500, 'errorMessage' => 'Server error. Please, contact to Service Provider.']);
         }
+    }
+
+    /**
+     * Store Grant Token & Refresh Token in Cache
+     */
+    private function checkoutTokenCached($token)
+    {
+        // grant token store in cache for 50 minutes
+        Cache::put(config('bkashapi.checkout.cache_grant_token_name'), $token, now()->addMinutes(50));
+
+        // refresh token store in cache for 55 minutes
+        Cache::put(config('bkashapi.checkout.cache_refresh_token_name'), $token, now()->addMinutes(55));
+
+        return true;
     }
 }

@@ -27,7 +27,7 @@ class BkashCheckoutController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error occured',
+                'errorMessage' => 'Error occured',
                 'errors' => $validator->getMessageBag(),
             ], 422);
         }
@@ -52,7 +52,7 @@ class BkashCheckoutController extends Controller
             return response()->json($response->collect());
         } catch (\Throwable $th) {
             // server error
-            return response()->json(Collection::make(['message' => 'Server error. Please, contact to Service Provider.']), 422);
+            return response()->json(Collection::make(['errorMessage' => 'Server error. Please, contact to Service Provider.']), 422);
         }
     }
 
@@ -73,7 +73,7 @@ class BkashCheckoutController extends Controller
             return response()->json($response->collect());
         } catch (\Throwable $th) {
             // server error
-            return response()->json(Collection::make(['message' => 'Server error. Please, contact to Service Provider.']), 422);
+            return response()->json(Collection::make(['errorMessage' => 'Server error. Please, contact to Service Provider.']), 422);
         }
     }
 }
