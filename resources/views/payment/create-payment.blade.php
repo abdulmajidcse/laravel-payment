@@ -28,18 +28,17 @@
                             if (data && data.paymentID != null) {
                                 paymentID = data.paymentID;
                                 bKash.create().onSuccess(data);
-
-                                console.log('create payment is success')
-                                console.log(data);
                             } else {
-                                console.log('create payment is null')
-                                console.log(data);
+                                // error 
+                                window.location.href = `{{ route('bkash.checkout.callback') }}?errorMessage=${data.errorMessage}`;
+                                // send bKash error
                                 bKash.create().onError();
                             }
                         })
                         .catch(function(error) {
-                            console.log('create payment catch error')
-                            console.log(error);
+                            // error 
+                            window.location.href = `{{ route('bkash.checkout.callback') }}?errorMessage=${error.errorMessage}`;
+                            // send bKash error
                             bKash.create().onError();
                         });
                 },
@@ -48,25 +47,28 @@
                         .then(function(response) {
                             data = response.data;
                             if (data && data.paymentID != null) {
-                                // window.location.href = "success.html";
-                                console.log('execute payment success')
-                                console.log(data);
+                                // payment success
+                                window.location.href = `{{ route('bkash.checkout.callback') }}?trxID=${data.trxID}`;
                             } else {
+                                // send bKash error
                                 bKash.execute().onError();
 
-                                console.log('execute payment is error')
-                                console.log(data);
+                                // error
+                                window.location.href = `{{ route('bkash.checkout.callback') }}?errorMessage=${data.errorMessage}`;
                             }
                         })
                         .catch(function(error) {
-                            console.log('execute payment catch error')
-                            console.log(error);
+                            // error
+                            window.location.href = `{{ route('bkash.checkout.callback') }}?errorMessage=${error.errorMessage}`;
+
+                            // send bKash error
                             bKash.execute().onError();
                         });
                 },
 
                 onClose: function() {
-                    alert('User has clicked the close button');
+                    // user close payment dialog
+                    window.location.href = `{{ route('bkash.checkout.callback') }}?errorMessage=User Cancel Payment Dialog`;
                 }
             });
         });

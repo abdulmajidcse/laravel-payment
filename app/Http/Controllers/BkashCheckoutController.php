@@ -76,4 +76,12 @@ class BkashCheckoutController extends Controller
             return response()->json(Collection::make(['errorMessage' => 'Server error. Please, contact to Service Provider.']), 422);
         }
     }
+
+    /**
+     * bKash Checkout Callback
+     */
+    public function callback(Request $request)
+    {
+        return $request;
+    }
 }

@@ -28,4 +28,5 @@ Route::prefix('payment')->name('payment.')->group(function() {
 Route::prefix('bkash/checkout')->name('bkash.checkout.')->group(function() {
     Route::post('create-payment', [BkashCheckoutController::class, 'createPayment'])->name('createPayment');
     Route::post('execute-payment/{paymentId}', [BkashCheckoutController::class, 'executePayment'])->name('executePayment');
+    Route::get('callback', [BkashCheckoutController::class, 'callback'])->name('callback');
 });
