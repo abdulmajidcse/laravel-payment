@@ -16,6 +16,7 @@ return [
         'execute_payment_url' => env('BKASH_CHECKOUT_EXECUTE_PAYMENT_URL', ''),
         'query_payment_url' => env('BKASH_CHECKOUT_QUERY_PAYMENT_URL', ''),
         'search_transaction_url' => env('BKASH_CHECKOUT_SEARCH_TRANSACTION_URL', ''),
+        'refund_url' => env('BKASH_CHECKOUT_REFUND_URL', ''),
 
         // cache name
         'cache_grant_token_name' => 'bkash_checkout_grant_token',

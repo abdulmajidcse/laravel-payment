@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Services\Bkash\BkashCheckoutService;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
+    use BkashCheckoutService;
+
     public function index()
     {
+        // for testing purpose in refund
+        // return $this->checkoutQueryPayment('ZKAOUC41655374259572');
+        // return $this->checkoutRefund(['paymentID' => 'ZKAOUC41655374259572', 'trxID' => '9FG5074ZTZ']);
+        // return $this->checkoutRefund(['paymentID' => 'ZKAOUC41655374259572', 'trxID' => '9FG5074ZTZ', 'amount' => '34', 'sku' => 'questionbank-1', 'reason' => 'product not received']);
         $data['payments'] = Payment::latest()->get();
         return view('payment.index', $data);
     }

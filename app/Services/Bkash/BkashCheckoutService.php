@@ -50,4 +50,24 @@ trait BkashCheckoutService
             return Collection::make(['errorCode' => 500, 'errorMessage' => 'Server error. Please, contact to Service Provider.']);
         }
     }
+
+    /**
+     * bKash checkout refund
+     */
+    public function checkoutRefund(array $refundInfo)
+    {
+        try {
+            $grantToken = $this->checkoutGrantToken();
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => $grantToken['id_token'],
+                'X-App-Key' => config('bkashapi.checkout.app_key')
+            ])->post(config('bkashapi.checkout.refund_url'), $refundInfo);
+
+            return $response->collect();
+        } catch (\Throwable $th) {
+            // server error
+            return Collection::make(['errorCode' => 500, 'errorMessage' => 'Server error. Please, contact to Service Provider.']);
+        }
+    }
 }
