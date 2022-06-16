@@ -35,7 +35,9 @@ trait BkashCheckoutTokenService
             $responseCollection = $response->collect();
 
             // cached grant & refresh token
-            $this->checkoutTokenCached($responseCollection);
+            if ($responseCollection->has('id_token')) {
+                $this->checkoutTokenCached($responseCollection);
+            }
 
             return $responseCollection;
         } catch (\Throwable $th) {
@@ -64,7 +66,9 @@ trait BkashCheckoutTokenService
             $responseCollection = $response->collect();
 
             // cached grant & refresh token
-            $this->checkoutTokenCached($responseCollection);
+            if ($responseCollection->has('id_token')) {
+                $this->checkoutTokenCached($responseCollection);
+            }
 
             return $responseCollection;
         } catch (\Throwable $th) {

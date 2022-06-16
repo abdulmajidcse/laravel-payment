@@ -6,8 +6,14 @@
     <div class="container mt-5">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">New Order</h5>
-                <a href="{{ route('payment.index') }}" class="btn btn-sm btn-primary">Payment List</a>
+                <div class="d-block d-md-flex">
+                    <div class="flex-md-grow-1">
+                        <h5 class="card-title">New Order</h5>
+                    </div>
+                    <div>
+                        <a href="{{ route('payment.index') }}" class="btn btn-sm btn-primary">Payment List</a>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <form action="{{ route('payment.createPayment') }}" method="post">

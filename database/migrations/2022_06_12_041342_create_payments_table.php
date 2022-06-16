@@ -16,7 +16,7 @@ class CreatePaymentsTable extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->string('customerMsisdn');
-            $table->double('amount');
+            $table->string('amount');
             $table->string('merchantInvoiceNumber');
             $table->string('currency');
             $table->string('intent');
@@ -24,8 +24,8 @@ class CreatePaymentsTable extends Migration
             $table->string('transactionStatus');
             $table->string('trxID');
             $table->string('payWith');
-            $table->timestampTz('createTime');
-            $table->timestampTz('updateTime');
+            $table->string('createTime');
+            $table->string('updateTime');
             $table->timestamps();
         });
     }

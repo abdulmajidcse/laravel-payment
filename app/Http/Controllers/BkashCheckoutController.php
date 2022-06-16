@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use App\Services\Bkash\BkashCheckoutTokenService;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class BkashCheckoutController extends Controller
@@ -18,23 +20,23 @@ class BkashCheckoutController extends Controller
      */
     public function createPayment(Request $request)
     {
-        // create payment request validate
-        $validator = Validator::make($request->all(), [
-            'amount' => 'required|numeric|min:1',
-        ]);
-
-        // return form validation error with json if error occured
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errorMessage' => 'Error occured',
-                'errors' => $validator->getMessageBag(),
-            ], 422);
-        }
-
-        $data = $validator->validated();
-
         try {
+            // create payment request validate
+            $validator = Validator::make($request->all(), [
+                'amount' => 'required|numeric|min:1',
+            ]);
+
+            // return form validation error with json if error occured
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errorMessage' => 'Error occured',
+                    'errors' => $validator->getMessageBag(),
+                ], 422);
+            }
+
+            $data = $validator->validated();
+
             $grantToken = $this->checkoutGrantToken();
 
             $response = Http::withHeaders([
@@ -46,7 +48,7 @@ class BkashCheckoutController extends Controller
                 'amount' => round($data['amount'], 2),
                 'currency' => 'BDT',
                 'intent' => 'sale',
-                'merchantInvoiceNumber' => uniqid(Str::slug(config('app.name')) . '-')
+                'merchantInvoiceNumber' => uniqid('ec')
             ]);
 
             return response()->json($response->collect());
@@ -78,10 +80,60 @@ class BkashCheckoutController extends Controller
     }
 
     /**
+     * Store Payment information when successfully payment executed
+     */
+    public function storePayment(Request $request)
+    {
+        try {
+            // create payment request validate
+            $validator = Validator::make($request->all(), [
+                'customerMsisdn' => 'required|string',
+                'amount' => 'required|string',
+                'merchantInvoiceNumber' => 'required|string',
+                'currency' => 'required|string',
+                'intent' => 'required|string',
+                'paymentID' => 'required|string',
+                'transactionStatus' => 'required|string',
+                'trxID' => 'required|string',
+                'createTime' => 'required|string',
+                'updateTime' => 'required|string',
+            ]);
+
+            // return form validation error with json if error occured
+            if ($validator->fails()) {
+                return response()->json([
+                    'errorCode' => 422,
+                    'errorMessage' => "Something's wrong to store Payment in request data",
+                    'errors' => $validator->getMessageBag(),
+                ], 422);
+            }
+
+            $data = $validator->validated();
+            $data['payWith'] = 'bKash';
+            Payment::create($data);
+
+            return response()->json(['statusCode' => 200, 'statusMessage' => 'Payment saved successfully']);
+        } catch (\Throwable $th) {
+            return response()->json(['errorCode' => 500, 'errorMessage' => "Something's wrong to store Payment", "serverError" => $th->getMessage()], 500);
+        }
+    }
+
+    /**
      * bKash Checkout Callback
      */
     public function callback(Request $request)
     {
-        return $request;
+        if ($request->has('statusMessage')) {
+            Session::flash('alertMessage', $request->get('statusMessage'));
+            Session::flash('alertType', 'success');
+        } elseif ($request->has('errorMessage')) {
+            Session::flash('alertMessage', $request->get('errorMessage'));
+            Session::flash('alertType', 'danger');
+        } else {
+            Session::flash('alertMessage', "Something's wrong to place your order");
+            Session::flash('alertType', 'danger');
+        }
+
+        return redirect()->route('payment.index');
     }
 }

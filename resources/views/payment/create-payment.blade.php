@@ -38,7 +38,7 @@
                             } else {
                                 // error 
                                 window.location.href =
-                                    `{{ route('bkash.checkout.callback') }}?errorMessage=${data.errorMessage}`;
+                                    `{{ $callbackUrl }}?errorMessage=${data.errorMessage}`;
                                 // send bKash error
                                 bKash.create().onError();
                             }
@@ -46,7 +46,7 @@
                         .catch(function(error) {
                             // error 
                             window.location.href =
-                                `{{ route('bkash.checkout.callback') }}?errorMessage=${error.errorMessage}`;
+                                `{{ $callbackUrl }}?errorMessage=${error.response?.data?.errorMessage ?? error.message}`;
                             // send bKash error
                             bKash.create().onError();
                         });
@@ -58,20 +58,26 @@
                             if (data && data.paymentID != null && data.transactionStatus ===
                                 'Completed') {
                                 // payment success
-                                window.location.href = `{{ route('bkash.checkout.callback') }}?trxID=${data.trxID}`;
+                                axios.post(`{{ route('bkash.checkout.storePayment') }}`, data)
+                                .then(function(response) {
+                                    window.location.href = `{{ $callbackUrl }}?statusMessage=Your order placed successfully`;
+                                })
+                                .catch(function(error) {
+                                    window.location.href = `{{ $callbackUrl }}?errorMessage=${error.response?.data?.errorMessage ?? error.message}`;
+                                });
                             } else {
                                 // send bKash error
                                 bKash.execute().onError();
 
                                 // error
                                 window.location.href =
-                                    `{{ route('bkash.checkout.callback') }}?errorMessage=${data.errorMessage}`;
+                                    `{{ $callbackUrl }}?errorMessage=${data.errorMessage}`;
                             }
                         })
                         .catch(function(error) {
                             // error
                             window.location.href =
-                                `{{ route('bkash.checkout.callback') }}?errorMessage=${error.errorMessage}`;
+                                `{{ $callbackUrl }}?errorMessage=${error.response?.data?.errorMessage ?? error.message}`;
 
                             // send bKash error
                             bKash.execute().onError();
@@ -81,7 +87,7 @@
                 onClose: function() {
                     // user close payment dialog
                     window.location.href =
-                        `{{ route('bkash.checkout.callback') }}?errorMessage=User Cancel Payment Dialog`;
+                        `{{ $callbackUrl }}?errorMessage=You are Canceled bKash Payment Dialog`;
                 }
             });
         });
