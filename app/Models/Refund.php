@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Payment extends Model
+class Refund extends Model
 {
     use HasFactory;
 
@@ -15,21 +15,19 @@ class Payment extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'customerMsisdn',
-        'amount',
-        'merchantInvoiceNumber',
-        'currency',
-        'intent',
-        'paymentID',
+        'payment_id',
+        'sku',
+        'reason',
         'transactionStatus',
-        'trxID',
-        'payWith',
-        'createTime',
-        'updateTime',
+        'refundTrxID',
+        'refundAmount',
+        'currency',
+        'charge',
+        'completedTime'
     ];
 
-    public function refund()
+    public function payment()
     {
-        return $this->hasOne(Refund::class);
+        return $this->belongsTo(Payment::class);
     }
 }

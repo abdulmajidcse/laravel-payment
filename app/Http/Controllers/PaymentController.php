@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Refund;
 use App\Services\Bkash\BkashCheckoutService;
 use Illuminate\Http\Request;
 
@@ -12,10 +13,6 @@ class PaymentController extends Controller
 
     public function index()
     {
-        // for testing purpose in refund
-        // return $this->checkoutQueryPayment('ZKAOUC41655374259572');
-        // return $this->checkoutRefund(['paymentID' => 'ZKAOUC41655374259572', 'trxID' => '9FG5074ZTZ']);
-        // return $this->checkoutRefund(['paymentID' => 'ZKAOUC41655374259572', 'trxID' => '9FG5074ZTZ', 'amount' => '34', 'sku' => 'questionbank-1', 'reason' => 'product not received']);
         $data['payments'] = Payment::latest()->get();
         return view('payment.index', $data);
     }
@@ -35,5 +32,48 @@ class PaymentController extends Controller
         $data['callbackUrl'] = config('bkashapi.checkout.callback_url');
 
         return view('payment.create-payment', $data);
+    }
+
+    public function refund(Payment $payment)
+    {
+        $data['payment'] = $payment;
+
+        return view('payment.refund', $data);
+    }
+
+    public function refundConfirm(Request $request, Payment $payment)
+    {
+        $data = $request->validate([
+            'amount' => 'required|numeric|min:1|max:' . $payment->amount,
+            'sku' => 'required|string',
+            'reason' => 'required|string',
+        ]);
+
+        $data['amount'] = round($data['amount'], 2);
+        $data['paymentID'] = $payment->paymentID;
+        $data['trxID'] = $payment->trxID;
+
+        $refundResponse = $this->checkoutRefund($data);
+
+        $refund = Refund::create([
+            'payment_id' => $payment->id,
+            'sku' => $data['sku'],
+            'reason' => $data['reason'],
+            'transactionStatus' => $refundResponse['transactionStatus'],
+            'refundTrxID' => $refundResponse['refundTrxID'],
+            'refundAmount' => $refundResponse['amount'],
+            'currency' => $refundResponse['currency'],
+            'charge' => $refundResponse['charge'],
+            'completedTime' => $refundResponse['completedTime'],
+        ]);
+
+        return redirect()->route('payment.refundDetails', $refund->id)->with(['alertMessage' => 'Successfully refund', 'alertType' => 'success']);
+    }
+
+    public function refundDetails(Refund $refund)
+    {
+        $data['refund'] = $refund;
+
+        return view('payment.refund-details', $data);
     }
 }

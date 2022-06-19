@@ -53,6 +53,10 @@ trait BkashCheckoutService
 
     /**
      * bKash checkout refund
+     * 
+     * if a payment is refunded and can see details put 2 parameters (paymentID, trxID)
+     * 
+     * otherwise, 5 parameters (paymentID, trxID, amount, sku, reason)
      */
     public function checkoutRefund(array $refundInfo)
     {

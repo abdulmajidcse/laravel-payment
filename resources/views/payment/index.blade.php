@@ -16,7 +16,8 @@
                 </div>
 
                 @if (Session::has('alertMessage') && Session::has('alertType'))
-                    <div class="mt-3 alert alert-{{ Session::get('alertType') }} alert-dismissible fade show" role="alert">
+                    <div class="mt-3 alert alert-{{ Session::get('alertType') }} alert-dismissible fade show"
+                        role="alert">
                         {{ Session::get('alertMessage') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -35,6 +36,7 @@
                                 <th scope="col">Trx ID</th>
                                 <th scope="col">transactionStatus</th>
                                 <th scope="col">Pay With</th>
+                                <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -48,6 +50,16 @@
                                     <td>{{ $payment->trxID }}</td>
                                     <td>{{ $payment->transactionStatus }}</td>
                                     <td>{{ $payment->payWith }}</td>
+                                    <td>
+                                        @if ($payment->refund)
+                                            <a href="{{ route('payment.refundDetails', $payment->refund->id) }}"
+                                                class="btn btn-sm btn-danger">Refund Details</a>
+                                        @else
+                                            <a href="{{ route('payment.refund', $payment->id) }}"
+                                                class="btn btn-sm btn-outline-primary">Refund Now</a>
+                                        @endif
+                                    </td>
+
                                 </tr>
                             @empty
                                 <tr>
