@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BkashCheckoutController;
+use App\Http\Controllers\NagadController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,4 +34,10 @@ Route::prefix('bkash/checkout')->name('bkash.checkout.')->group(function() {
     Route::post('execute-payment/{paymentId}', [BkashCheckoutController::class, 'executePayment'])->name('executePayment');
     Route::post('store-payment', [BkashCheckoutController::class, 'storePayment'])->name('storePayment');
     Route::get('callback', [BkashCheckoutController::class, 'callback'])->name('callback');
+});
+
+
+Route::prefix('nagad')->name('nagad.')->group(function() {
+    Route::get('init-payment', [NagadController::class, 'initPayment']);
+    Route::get('payment-verify', [NagadController::class, 'paymentVerify']);
 });
