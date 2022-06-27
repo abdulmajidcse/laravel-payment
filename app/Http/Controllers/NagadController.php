@@ -42,10 +42,16 @@ class NagadController extends Controller
         $verifyPayment = $this->paymentVerification($request->query('payment_ref_id'));
 
         if ($verifyPayment->get('status') == 'Success' && !is_null($verifyPayment->get('issuerPaymentRefNo'))) {
-            $request->session()->flash('alertMessage', 'Your order placed successfully');
-            $request->session()->flash('alertType', 'success');
+            $isPaymentExist = NagadPayment::where('paymentRefId', $verifyPayment->get('paymentRefId'))->first();
 
-            NagadPayment::create($verifyPayment->toArray());
+            if ($isPaymentExist) {
+                $request->session()->flash('alertMessage', 'Payment is already checkout. Please, try another!');
+                $request->session()->flash('alertType', 'warning');
+            } else {
+                NagadPayment::create($verifyPayment->toArray());
+                $request->session()->flash('alertMessage', 'Your order placed successfully');
+                $request->session()->flash('alertType', 'success');
+            }
         } else {
             // for any error if present
             $request->session()->flash('alertMessage', 'Something went wrong to payment. Please, try again!');
