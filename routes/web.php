@@ -20,7 +20,7 @@ Route::get('/', function () {
     return view('home');
 });
 
-Route::prefix('payment')->name('payment.')->group(function() {
+Route::prefix('payment')->name('payment.')->group(function () {
     Route::get('/', [PaymentController::class, 'index'])->name('index');
     Route::get('new-order', [PaymentController::class, 'newOrder'])->name('newOrder');
     Route::post('create-payment', [PaymentController::class, 'createPayment'])->name('createPayment');
@@ -29,7 +29,7 @@ Route::prefix('payment')->name('payment.')->group(function() {
     Route::get('refund/{refund}/details', [PaymentController::class, 'refundDetails'])->name('refundDetails');
 });
 
-Route::prefix('bkash/checkout')->name('bkash.checkout.')->group(function() {
+Route::prefix('bkash/checkout')->name('bkash.checkout.')->group(function () {
     Route::post('create-payment', [BkashCheckoutController::class, 'createPayment'])->name('createPayment');
     Route::post('execute-payment/{paymentId}', [BkashCheckoutController::class, 'executePayment'])->name('executePayment');
     Route::post('store-payment', [BkashCheckoutController::class, 'storePayment'])->name('storePayment');
@@ -37,7 +37,9 @@ Route::prefix('bkash/checkout')->name('bkash.checkout.')->group(function() {
 });
 
 
-Route::prefix('nagad')->name('nagad.')->group(function() {
-    Route::get('init-payment', [NagadController::class, 'initPayment']);
-    Route::get('payment-verify', [NagadController::class, 'paymentVerify']);
+Route::prefix('nagad')->name('nagad.')->group(function () {
+    Route::get('/', [NagadController::class, 'index'])->name('index');
+    Route::get('new-order', [NagadController::class, 'newOrder'])->name('newOrder');
+    Route::post('init-payment', [NagadController::class, 'initPayment'])->name('initPayment');
+    Route::get('payment-verify', [NagadController::class, 'paymentVerify'])->name('paymentVerify');
 });

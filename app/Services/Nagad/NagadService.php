@@ -44,7 +44,7 @@ trait NagadService
     /**
      * Nagad Checkout Initialize API
      */
-    public function checkoutInitialize()
+    private function checkoutInitialize()
     {
         try {
             $data = [

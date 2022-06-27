@@ -8,7 +8,7 @@
             <div class="card-header">
                 <div class="d-block d-md-flex">
                     <div class="flex-md-grow-1">
-                        <h5 class="card-title">Payment List</h5>
+                        <h5 class="card-title">Payment List (bKash)</h5>
                     </div>
                     <div>
                         <a href="{{ route('payment.newOrder') }}" class="btn btn-sm btn-primary">New Order</a>
