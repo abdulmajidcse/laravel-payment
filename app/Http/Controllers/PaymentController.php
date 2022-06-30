@@ -76,4 +76,9 @@ class PaymentController extends Controller
 
         return view('payment.refund-details', $data);
     }
+
+    public function trxDetails($trxId)
+    {
+        return $this->checkoutSearchTransaction($trxId);
+    }
 }

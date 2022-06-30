@@ -5,6 +5,7 @@ namespace App\Services\Bkash;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait BkashCheckoutTokenService
 {
@@ -22,15 +23,19 @@ trait BkashCheckoutTokenService
                 return $this->checkoutRefreshToken(Cache::get($cacheRefreshToken)['refresh_token']);
             }
 
-            $response = Http::withHeaders([
+            $headers = [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'username' => config('bkashapi.checkout.username'),
                 'password' => config('bkashapi.checkout.password')
-            ])->post(config('bkashapi.checkout.grant_token_url'), [
+            ];
+
+            $bodyParams = [
                 'app_key' => config('bkashapi.checkout.app_key'),
                 'app_secret' => config('bkashapi.checkout.app_secret')
-            ]);
+            ];
+
+            $response = Http::withHeaders($headers)->post(config('bkashapi.checkout.grant_token_url'), $bodyParams);
 
             $responseCollection = $response->collect();
 
@@ -38,6 +43,12 @@ trait BkashCheckoutTokenService
             if ($responseCollection->has('id_token')) {
                 $this->checkoutTokenCached($responseCollection);
             }
+
+            // grant token message in log
+            Log::info("\nAPI Title : Grant Token \nAPI URL: " . config('bkashapi.checkout.grant_token_url') . "\nRequest Body :");
+            Log::info('headers: ', $headers);
+            Log::info('body params: ', $bodyParams);
+            Log::info('API Response: ', $responseCollection->toArray());
 
             return $responseCollection;
         } catch (\Throwable $th) {

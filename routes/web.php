@@ -27,6 +27,8 @@ Route::prefix('payment')->name('payment.')->group(function () {
     Route::get('refund/{payment}', [PaymentController::class, 'refund'])->name('refund');
     Route::post('refund/{payment}', [PaymentController::class, 'refundConfirm'])->name('refundConfirm');
     Route::get('refund/{refund}/details', [PaymentController::class, 'refundDetails'])->name('refundDetails');
+
+    Route::get('trx-details/{trxId}', [PaymentController::class, 'trxDetails'])->name('trxDetails');
 });
 
 Route::prefix('bkash/checkout')->name('bkash.checkout.')->group(function () {

@@ -3,17 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Services\Bkash\BkashCheckoutService;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use App\Services\Bkash\BkashCheckoutTokenService;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use App\Services\Bkash\BkashCheckoutTokenService;
 
 class BkashCheckoutController extends Controller
 {
-    use BkashCheckoutTokenService;
+    use BkashCheckoutTokenService, BkashCheckoutService;
 
     /**
      * bKash Checkout Create Payment
@@ -39,17 +41,27 @@ class BkashCheckoutController extends Controller
 
             $grantToken = $this->checkoutGrantToken();
 
-            $response = Http::withHeaders([
+            $headers = [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'Authorization' => $grantToken['id_token'],
                 'X-App-Key' => config('bkashapi.checkout.app_key')
-            ])->post(config('bkashapi.checkout.create_payment_url'), [
+            ];
+
+            $bodyParams = [
                 'amount' => round($data['amount'], 2),
                 'currency' => 'BDT',
                 'intent' => 'sale',
                 'merchantInvoiceNumber' => uniqid('ec')
-            ]);
+            ];
+
+            $response = Http::withHeaders($headers)->post(config('bkashapi.checkout.create_payment_url'), $bodyParams);
+
+            // create payment message in log
+            Log::info("\nAPI Title : Create Payment \nAPI URL: " . config('bkashapi.checkout.create_payment_url') . "\nRequest Body :");
+            Log::info('headers: ', $headers);
+            Log::info('body params: ', $bodyParams);
+            Log::info('API Response: ', $response->collect()->toArray());
 
             return response()->json($response->collect());
         } catch (\Throwable $th) {
@@ -66,11 +78,18 @@ class BkashCheckoutController extends Controller
         try {
             $grantToken = $this->checkoutGrantToken();
 
-            $response = Http::withHeaders([
+            $headers = [
                 'Accept' => 'application/json',
                 'Authorization' => $grantToken['id_token'],
                 'X-App-Key' => config('bkashapi.checkout.app_key')
-            ])->post(config('bkashapi.checkout.execute_payment_url') . '/' . $paymentId);
+            ];
+
+            $response = Http::withHeaders($headers)->post(config('bkashapi.checkout.execute_payment_url') . '/' . $paymentId);
+
+            //  Execute Payment message in log
+            Log::info("\nAPI Title :  Execute Payment \nAPI URL: " . config('bkashapi.checkout.execute_payment_url') . '/' . $paymentId . "\nRequest Body :");
+            Log::info('headers: ', $headers);
+            Log::info('API Response: ', $response->collect()->toArray());
 
             return response()->json($response->collect());
         } catch (\Throwable $th) {
@@ -109,10 +128,18 @@ class BkashCheckoutController extends Controller
             }
 
             $data = $validator->validated();
-            $data['payWith'] = 'bKash';
-            Payment::create($data);
-
-            return response()->json(['statusCode' => 200, 'statusMessage' => 'Payment saved successfully']);
+            // query payment for check real payment
+            $queryPayment = $this->checkoutQueryPayment($data['paymentID']);
+            if ($queryPayment->has('trxID') && $queryPayment->get('transactionStatus') == 'Completed' && !Payment::where('trxID', $queryPayment->get('trxID'))->first()) {
+                // store payment
+                $formData = $queryPayment->toArray();
+                $formData['customerMsisdn'] = $data['customerMsisdn'];
+                $formData['payWith'] = 'bKash';
+                Payment::create($formData);
+                return response()->json(['statusCode' => 200, 'statusMessage' => 'Payment saved successfully']);
+            } else {
+                return response()->json(['errorCode' => 422, 'errorMessage' => "Payment failed! Try again."], 422);
+            }
         } catch (\Throwable $th) {
             return response()->json(['errorCode' => 500, 'errorMessage' => "Something's wrong to store Payment", "serverError" => $th->getMessage()], 500);
         }
