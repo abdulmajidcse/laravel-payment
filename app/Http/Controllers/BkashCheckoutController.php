@@ -154,13 +154,13 @@ class BkashCheckoutController extends Controller
     public function callback(Request $request)
     {
         if ($request->has('statusMessage')) {
-            Session::flash('alertMessage', $request->get('statusMessage'));
+            Session::flash('alertMessage', $request->query('statusMessage'));
             Session::flash('alertType', 'success');
         } elseif ($request->has('errorMessage')) {
-            Session::flash('alertMessage', $request->get('errorMessage'));
+            Session::flash('alertMessage', strtolower($request->query('errorMessage')) == 'undefined' ? 'Payment failed!' : $request->query('errorMessage'));
             Session::flash('alertType', 'danger');
         } else {
-            Session::flash('alertMessage', "Something's wrong to place your order");
+            Session::flash('alertMessage', "Payment failed!");
             Session::flash('alertType', 'danger');
         }
 
