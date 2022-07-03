@@ -45,10 +45,12 @@ trait BkashCheckoutTokenService
             }
 
             // grant token message in log
-            Log::info("\nAPI Title : Grant Token \nAPI URL: " . config('bkashapi.checkout.grant_token_url') . "\nRequest Body :");
-            Log::info('headers: ', $headers);
-            Log::info('body params: ', $bodyParams);
-            Log::info('API Response: ', $responseCollection->toArray());
+            if (app()->environment('local')) {
+                Log::info("\nAPI Title : Grant Token \nAPI URL: " . config('bkashapi.checkout.grant_token_url') . "\nRequest Body :");
+                Log::info('headers: ', $headers);
+                Log::info('body params: ', $bodyParams);
+                Log::info('API Response: ', $responseCollection->toArray());
+            }
 
             return $responseCollection;
         } catch (\Throwable $th) {

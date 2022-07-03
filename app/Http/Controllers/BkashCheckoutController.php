@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Services\Bkash\BkashCheckoutService;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -58,10 +57,12 @@ class BkashCheckoutController extends Controller
             $response = Http::withHeaders($headers)->post(config('bkashapi.checkout.create_payment_url'), $bodyParams);
 
             // create payment message in log
-            Log::info("\nAPI Title : Create Payment \nAPI URL: " . config('bkashapi.checkout.create_payment_url') . "\nRequest Body :");
-            Log::info('headers: ', $headers);
-            Log::info('body params: ', $bodyParams);
-            Log::info('API Response: ', $response->collect()->toArray());
+            if (app()->environment('local')) {
+                Log::info("\nAPI Title : Create Payment \nAPI URL: " . config('bkashapi.checkout.create_payment_url') . "\nRequest Body :");
+                Log::info('headers: ', $headers);
+                Log::info('body params: ', $bodyParams);
+                Log::info('API Response: ', $response->collect()->toArray());
+            }
 
             return response()->json($response->collect());
         } catch (\Throwable $th) {
@@ -87,9 +88,11 @@ class BkashCheckoutController extends Controller
             $response = Http::withHeaders($headers)->post(config('bkashapi.checkout.execute_payment_url') . '/' . $paymentId);
 
             //  Execute Payment message in log
-            Log::info("\nAPI Title :  Execute Payment \nAPI URL: " . config('bkashapi.checkout.execute_payment_url') . '/' . $paymentId . "\nRequest Body :");
-            Log::info('headers: ', $headers);
-            Log::info('API Response: ', $response->collect()->toArray());
+            if (app()->environment('local')) {
+                Log::info("\nAPI Title :  Execute Payment \nAPI URL: " . config('bkashapi.checkout.execute_payment_url') . '/' . $paymentId . "\nRequest Body :");
+                Log::info('headers: ', $headers);
+                Log::info('API Response: ', $response->collect()->toArray());
+            }
 
             return response()->json($response->collect());
         } catch (\Throwable $th) {

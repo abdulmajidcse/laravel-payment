@@ -28,9 +28,11 @@ trait BkashCheckoutService
             $response = Http::withHeaders($headers)->get(config('bkashapi.checkout.query_payment_url') . '/' . $paymentId);
 
             // Query Payment message in log
-            Log::info("\nAPI Title : Query Payment \nAPI URL: " . config('bkashapi.checkout.query_payment_url') . '/' . $paymentId . "\nRequest Body :");
-            Log::info('headers: ', $headers);
-            Log::info('API Response: ', $response->collect()->toArray());
+            if (app()->environment('local')) {
+                Log::info("\nAPI Title : Query Payment \nAPI URL: " . config('bkashapi.checkout.query_payment_url') . '/' . $paymentId . "\nRequest Body :");
+                Log::info('headers: ', $headers);
+                Log::info('API Response: ', $response->collect()->toArray());
+            }
 
             return $response->collect();
         } catch (\Throwable $th) {
@@ -57,9 +59,11 @@ trait BkashCheckoutService
             $response = Http::withHeaders($headers)->get(config('bkashapi.checkout.search_transaction_url') . '/' . $trxId);
 
             // : Search Transaction Details message in log
-            Log::info("\nAPI Title : : Search Transaction Details \nAPI URL: " . config('bkashapi.checkout.search_transaction_url') . '/' . $trxId . "\nRequest Body :");
-            Log::info('headers: ', $headers);
-            Log::info('API Response: ', $response->collect()->toArray());
+            if (app()->environment('local')) {
+                Log::info("\nAPI Title : : Search Transaction Details \nAPI URL: " . config('bkashapi.checkout.search_transaction_url') . '/' . $trxId . "\nRequest Body :");
+                Log::info('headers: ', $headers);
+                Log::info('API Response: ', $response->collect()->toArray());
+            }
 
             return $response->collect();
         } catch (\Throwable $th) {
