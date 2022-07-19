@@ -55,7 +55,7 @@ class NagadController extends Controller
         } else {
             // for any error if present
             $request->session()->flash('alertMessage', 'Something went wrong to payment. Please, try again!');
-            $request->session()->flash('alertType', 'danger');
+            $request->session()->flash('alertType', 'error');
         }
 
         return redirect()->route('nagad.index');

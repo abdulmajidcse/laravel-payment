@@ -158,10 +158,10 @@ class BkashCheckoutController extends Controller
             Session::flash('alertType', 'success');
         } elseif ($request->has('errorMessage')) {
             Session::flash('alertMessage', strtolower($request->query('errorMessage')) == 'undefined' ? 'Payment failed!' : $request->query('errorMessage'));
-            Session::flash('alertType', 'danger');
+            Session::flash('alertType', 'error');
         } else {
             Session::flash('alertMessage', "Payment failed!");
-            Session::flash('alertType', 'danger');
+            Session::flash('alertType', 'error');
         }
 
         return redirect()->route('payment.index');
